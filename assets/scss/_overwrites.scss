@@ -1,0 +1,37 @@
+
+.v-application a {
+  text-decoration: none;
+}
+
+.v-btn {
+  letter-spacing: 0 !important;
+}
+
+.text-14 {
+  font-size: 14px !important;
+}
+
+.text-18 {
+  font-size: 18px !important;
+}
+
+.text-20 {
+  font-size: 20px !important;
+}
+
+.w-full {
+  width: 100% !important;
+}
+
+.radius-4 {
+  border-radius: 4px !important;
+}
+
+.radius-6 {
+  border-radius: 6px !important;
+}
+
+
+.v-input--radio-group--column .v-radio:not(:last-child):not(:only-child) {
+  margin-bottom: 0 !important;
+}
