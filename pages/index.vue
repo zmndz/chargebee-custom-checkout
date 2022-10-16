@@ -165,7 +165,7 @@
                           </div>
                         </v-col>
                         <v-col cols="12">
-                          <v-btn color="primary" rounded x-large>
+                          <v-btn color="primary" rounded x-large @click="checkoutCreditCard">
                             <div class="mx-4">
                               <v-icon
                                 left
@@ -223,11 +223,13 @@
                           </div>
                         </div>
                         <div>
-                          <v-btn color="primary" rounded x-large>
+                          <v-btn color="primary" rounded x-large @click="checkoutPaypal">
                             <div class="mx-4">
                               Continue to PayPal
                             </div>
                           </v-btn>
+                        </div>
+                        <div id="paypal-button">
                         </div>
                       </div>
                     </div>
@@ -295,12 +297,105 @@ export default {
       paymentMethods: ['Credit Cards', 'PayPal'],
       selectedPaymentMethod: 'Credit Cards',
       saveCardDetail: false,
-
+      cbInstance: null,
     }
   },
   mounted() {
+    console.log('$axios: ', this.$axios);
+    this.cbInstance = Chargebee.init({
+      site: "poliigon-test", // your test site
+      // domain: "https://poliigon.com", // this is an optional parameter.
+      publishableKey: "test_hJdA7C4QBzAdoAjzCpw0ZI6lo7ONkCaA",
+    })
+
+    console.log('this.cbInstance: ', this.cbInstance);
+
+    // this.cbInstance.load('bancontact').then((bancontactHandler) => {
+      // console.log('bancontactHandler: ', bancontactHandler);
+      // createPaymentIntent().then((intent) => {
+      //   console.log('intent: ', intent);
+      //   bancontactHandler.setPaymentIntent(intent, { adyen: checkout }); 
+      // })
+    // });
+
   },
   methods: {
+    checkoutCreditCard() {
+      this.cbInstance.handlePayment('bancontact', {
+          paymentInfo: {
+              card: {
+                firstName: 'John',
+                lastName: 'Doe',
+                number: '6703444444444449',
+                expiryMonth: '03',
+                expiryYear: '2030'
+              }
+          }
+      }).then((intent) => {
+        console.log('intent 2: ', intent);
+        // you can create subscription by using payment_intent
+      }).catch((err) => {
+        console.log('err: ', err);
+        // handle error
+      });
+
+    },
+    checkoutPaypal() {
+      this.cbInstance.load("paypal").then((paypalHandler) => {
+        console.log('paypalHandler: ', paypalHandler);
+        this.createPaymentIntentPaypal()
+          .then((payment_intent) => {
+            console.log('payment_intent: ', payment_intent);
+            paypalHandler.setPaymentIntent(payment_intent);
+            return paypalHandler.mountPaymentButton("#paypal-button");
+          })
+          .then(() => {
+            // once button mounted
+            return paypalHandler.handlePayment();
+          })
+          .then((paymentIntent) => {
+            console.log('paymentIntent: ', paymentIntent);
+            // handle success
+          })
+          .catch((error) => {
+            console.log('error: ', error);
+            // handle error
+          });
+      });
+    },
+    async createPaymentIntentPaypal() {
+      // this.$axios.onRequest((config) => {
+      //   config.headers.common.Accept = 'application/json';
+      //   // config.headers.common['Cache-Control'] = 'no cache';
+      //   config.headers.common['Access-Control-Allow-Origin'] = '*';
+      // });
+
+      let result = await this.$axios.$post(
+        "https://cors-anywhere.herokuapp.com/https://poliigon.chargebee.com/api/v2/payment_intents",
+        {
+          amount: 100,
+          currency_code: "USD",
+          payment_method_type: "paypal_express_checkout",
+        }
+      )
+      console.log('result: ', result);
+
+      // return fetch("https://poliigon.chargebee.com/api/v2/payment_intents", {
+      //   body: JSON.stringify({
+      //     amount: 100,
+      //     currency_code: "USD",
+      //     payment_method_type: "paypal_express_checkout",
+      //   }),
+      // })
+      //   .then(function (response) {
+      //     console.log('response: ', response);
+      //     return response.json();
+      //   })
+      //   .then(function (responseJson) {
+      //     console.log('responseJson: ', responseJson);
+      //     return responseJson.payment_intent;
+      //   });
+    }
   }
 }
 </script>

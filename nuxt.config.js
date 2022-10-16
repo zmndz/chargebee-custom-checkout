@@ -13,7 +13,10 @@ export default {
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
-    ]
+    ],
+    script: [
+      { src: 'https://js.chargebee.com/v2/chargebee.js' }
+    ],
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
